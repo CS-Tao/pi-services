@@ -52,7 +52,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${SEAFILE_DB_ROOT_PASSWD}
       MYSQL_LOG_CONSOLE: "true"
     volumes:
-      - seafile-db:/var/lib/mysql
+      - seafile-db-v:/var/lib/mysql
     networks:
       - seafile-net
   memcached:
@@ -65,7 +65,7 @@ services:
     image: seafileltd/seafile-mc:latest
     container_name: seafile
     volumes:
-      - seafile-shared:/shared
+      - seafile-shared-v:/shared
     environment:
       - DB_HOST=seafile-db
       - TIME_ZONE=Asia/Shanghai
