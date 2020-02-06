@@ -11,7 +11,7 @@
 
 ## 已配置服务
 
-![services_graph.svg](https://home.cs-tao.cc/pi-services/services_graph.svg?1)
+![services_graph.svg](https://home.cs-tao.cc/pi-services/services_graph.svg)
 
 ## 部署方法
 
@@ -44,5 +44,5 @@
 
 - 恢复 seafile-db 数据
     ```bash
-    docker exec seafile-db-backup /restore.sh /backup/latest.seat-records.sql.gz
+    docker exec seafile-db-backup /restore.sh /backup/latest.<database_name>.sql.gz
     ```
