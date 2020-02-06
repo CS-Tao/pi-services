@@ -2,7 +2,7 @@
 
 树莓派 Docker 服务集群
 
-[![Docker Image CI](https://github.com/CS-Tao/services/pi-workflows/Docker%20Compose%20CI/badge.svg)](https://github.com/CS-Tao/pi-services/actions)
+[![Docker Image CI](https://github.com/CS-Tao/pi-services/workflows/Docker%20Compose%20CI/badge.svg)](https://github.com/CS-Tao/pi-services/actions)
 
 ## 项目依赖
 
