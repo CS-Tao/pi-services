@@ -1,0 +1,20 @@
+# enviroment file
+.env
+
+# for ci
+ci
+
+# backup
+backup/backups/*
+backup/log/*
+backup/sync/*
+
+# caddy
+caddy/logs/*
+caddy/www/*
+
+# hass
+hass/config/*
+
+# upload folder only
+!.gitkeep

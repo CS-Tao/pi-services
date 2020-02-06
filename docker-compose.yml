@@ -1,0 +1,123 @@
+version: '3.5'
+
+services:
+  # cron-backup
+  cron-backup:
+    image: cstao/cron-backup:v1.0.0
+    container_name: cron-backup
+    restart: unless-stopped
+    volumes:
+      - ./backup/backups/:/root/backups/
+      - ./backup/sync/:/root/sync/
+      - ./backup/log/:/var/log/
+    environment:
+      HOST: ${CRON_BACKUP_HOST}
+      SSH_PORT: ${CRON_BACKUP_SSH_PORT}
+      SSH_USER: ${CRON_BACKUP_SSH_USER}
+      SSH_PASSWD: ${CRON_BACKUP_SSH_PASSWD}
+      SYNC_FILES: ${CRON_BACKUP_SYNC_FILES}
+      SYNC_FOLDERS: ${CRON_BACKUP_SYNC_FOLDERS}
+      MAX_BACKUPS: 7
+      INIT_BACKUP: 1
+      INIT_BACKUP_TIMEOUT: 0
+      CRON_TIME: '0 4 * * *'
+
+  # hass
+  hass:
+    image: homeassistant/home-assistant
+    container_name: home-assistant
+    volumes:
+      - /hass/config/:/config/
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - hass-network
+
+  # portainer
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    command: --admin-password '${PORTAINER_ADMIN_PASSWD_HASHED}'
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-v:/data
+    networks:
+      - portainer-network
+
+  # seafile (3 services)
+  seafile-db:
+    image: mariadb:10.1
+    container_name: seafile-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SEAFILE_DB_ROOT_PASSWD}
+      MYSQL_LOG_CONSOLE: true
+    volumes:
+      - seafile-db:/var/lib/mysql
+    networks:
+      - seafile-net
+  memcached:
+    image: memcached:1.5.6
+    container_name: seafile-memcached
+    entrypoint: memcached -m 256
+    networks:
+      - seafile-net
+  seafile:
+    image: seafileltd/seafile-mc:latest
+    container_name: seafile
+    volumes:
+      - seafile-shared:/shared
+    environment:
+      - DB_HOST=seafile-db
+      - TIME_ZONE=Asia/Shanghai
+      - SEAFILE_SERVER_LETSENCRYPT=false
+      - DB_ROOT_PASSWD=${SEAFILE_DB_ROOT_PASSWD}
+      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL}
+      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}
+      - SEAFILE_SERVER_HOSTNAME=${SEAFILE_SERVER_HOSTNAME}
+    depends_on:
+      - seafile-db
+      - memcached
+    networks:
+      - seafile-net
+
+  # caddy
+  caddy:
+    image: abiosoft/caddy
+    container_name: caddy
+    environment:
+      ACME_AGREE: "true"
+      DOMAIN_FILES: ${CADDY_DOMAIN_FILES}
+      DOMAIN_HASS: ${CADDY_DOMAIN_HASS}
+      DOMAIN_PORTAINER: ${CADDY_DOMAIN_PORTAINER}
+      DOMAIN_SEAFILE: ${CADDY_DOMAIN_SEAFILE}
+    restart: unless-stopped
+    ports:
+      - ${CADDY_PORT}:80
+    volumes:
+      - ./caddy/Caddyfile:/etc/Caddyfile:ro
+      - ./caddy/caddyfile.d/:/etc/caddyfile.d/:ro
+      - ./caddy/www/:/srv/:ro
+      - ./caddy/logs/:/var/logs/
+    depends_on:
+      - hass
+      - portainer
+    networks:
+      - hass-network
+      - portainer-network
+
+volumes:
+  portainer-v:
+    name: portainer-data
+  seafile-db-v:
+    name: seafile-db
+  seafile-shared-v:
+    name: seafile-shared
+
+networks:
+  default:
+    name: pi-services-network
+  portainer-network:
+    name: portainer-network
+  hass-network:
+    name: hass-network
+    driver: host
