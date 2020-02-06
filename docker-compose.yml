@@ -78,7 +78,7 @@ services:
       - seafile-db
       - memcached
     networks:
-      - seafile-net
+      - seafile-network
 
   # caddy
   caddy:
@@ -101,9 +101,11 @@ services:
     depends_on:
       - hass
       - portainer
+      - seafile
     networks:
       - hass-network
       - portainer-network
+      - seafile-network
 
 volumes:
   portainer-v:
@@ -121,3 +123,5 @@ networks:
   hass-network:
     name: hass-network
     driver: host
+  seafile-network:
+    name: seafile-network
