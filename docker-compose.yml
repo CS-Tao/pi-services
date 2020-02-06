@@ -29,6 +29,7 @@ services:
     volumes:
       - /hass/config/:/config/
       - /etc/localtime:/etc/localtime:ro
+    network_mode: host
     networks:
       - hass-network
 
@@ -46,7 +47,7 @@ services:
 
   # seafile (4 services)
   seafile-db:
-    image: mariadb:10.1
+    image:  jsurf/rpi-mariadb
     container_name: seafile-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${SEAFILE_DB_ROOT_PASSWD}
@@ -140,6 +141,5 @@ networks:
     name: portainer-network
   hass-network:
     name: hass-network
-    driver: host
   seafile-network:
     name: seafile-network
