@@ -44,7 +44,7 @@ services:
     networks:
       - portainer-network
 
-  # seafile (3 services)
+  # seafile (4 services)
   seafile-db:
     image: mariadb:10.1
     container_name: seafile-mysql
@@ -53,6 +53,24 @@ services:
       MYSQL_LOG_CONSOLE: "true"
     volumes:
       - seafile-db-v:/var/lib/mysql
+    networks:
+      - seafile-network
+  seafile-db-backup:
+    image: fradelg/mysql-cron-backup
+    container_name: seafile-db-backup
+    restart: unless-stopped
+    volumes:
+      - ./seafile/backup:/backup
+    environment:
+      MYSQL_HOST: seafile-db
+      MYSQL_USER: root
+      MYSQL_PASS: ${SEAFILE_DB_ROOT_PASSWD}
+      MAX_BACKUPS: 7
+      INIT_BACKUP: 1
+      CRON_TIME: 0 3 * * *
+      TIMEOUT: 60s
+    depends_on:
+      - seafile-db
     networks:
       - seafile-network
   memcached:

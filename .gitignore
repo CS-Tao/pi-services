@@ -16,5 +16,8 @@ caddy/www/*
 # hass
 hass/config/*
 
+# seafile
+seafile/backup/*
+
 # upload folder only
 !.gitkeep
