@@ -54,13 +54,13 @@ services:
     volumes:
       - seafile-db-v:/var/lib/mysql
     networks:
-      - seafile-net
+      - seafile-network
   memcached:
     image: memcached:1.5.6
     container_name: seafile-memcached
     entrypoint: memcached -m 256
     networks:
-      - seafile-net
+      - seafile-network
   seafile:
     image: seafileltd/seafile-mc:latest
     container_name: seafile
