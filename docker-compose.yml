@@ -27,9 +27,9 @@ services:
     image: homeassistant/home-assistant
     container_name: home-assistant
     volumes:
-      - /hass/config/:/config/
+      - ./hass/config/:/config/
       - /etc/localtime:/etc/localtime:ro
-    network_mode: host
+    # network_mode: host
     networks:
       - hass-network
 
@@ -54,24 +54,6 @@ services:
       MYSQL_LOG_CONSOLE: "true"
     volumes:
       - seafile-db-v:/var/lib/mysql
-    networks:
-      - seafile-network
-  seafile-db-backup:
-    image: fradelg/mysql-cron-backup
-    container_name: seafile-db-backup
-    restart: unless-stopped
-    volumes:
-      - ./seafile/backup:/backup
-    environment:
-      MYSQL_HOST: seafile-db
-      MYSQL_USER: root
-      MYSQL_PASS: ${SEAFILE_DB_ROOT_PASSWD}
-      MAX_BACKUPS: 7
-      INIT_BACKUP: 1
-      CRON_TIME: 0 3 * * *
-      TIMEOUT: 60s
-    depends_on:
-      - seafile-db
     networks:
       - seafile-network
   memcached:
@@ -111,7 +93,7 @@ services:
       DOMAIN_SEAFILE: ${CADDY_DOMAIN_SEAFILE}
     restart: unless-stopped
     ports:
-      - ${CADDY_PORT}:80
+      - ${CADDY_PORT}:2015
     volumes:
       - ./caddy/Caddyfile:/etc/Caddyfile:ro
       - ./caddy/caddyfile.d/:/etc/caddyfile.d/:ro
