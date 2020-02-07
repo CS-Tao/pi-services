@@ -2,25 +2,25 @@ version: '3.5'
 
 services:
   # cron-backup
-  cron-backup:
-    image: cstao/cron-backup:v1.0.0
-    container_name: cron-backup
-    restart: unless-stopped
-    volumes:
-      - ./backup/backups/:/root/backups/
-      - ./backup/sync/:/root/sync/
-      - ./backup/log/:/var/log/
-    environment:
-      HOST: ${CRON_BACKUP_HOST}
-      SSH_PORT: ${CRON_BACKUP_SSH_PORT}
-      SSH_USER: ${CRON_BACKUP_SSH_USER}
-      SSH_PASSWD: ${CRON_BACKUP_SSH_PASSWD}
-      SYNC_FILES: ${CRON_BACKUP_SYNC_FILES}
-      SYNC_FOLDERS: ${CRON_BACKUP_SYNC_FOLDERS}
-      MAX_BACKUPS: 7
-      INIT_BACKUP: 1
-      INIT_BACKUP_TIMEOUT: 0
-      CRON_TIME: '0 4 * * *'
+  # cron-backup:
+  #   image: cstao/cron-backup:v1.0.0
+  #   container_name: cron-backup
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./backup/backups/:/root/backups/
+  #     - ./backup/sync/:/root/sync/
+  #     - ./backup/log/:/var/log/
+  #   environment:
+  #     HOST: ${CRON_BACKUP_HOST}
+  #     SSH_PORT: ${CRON_BACKUP_SSH_PORT}
+  #     SSH_USER: ${CRON_BACKUP_SSH_USER}
+  #     SSH_PASSWD: ${CRON_BACKUP_SSH_PASSWD}
+  #     SYNC_FILES: ${CRON_BACKUP_SYNC_FILES}
+  #     SYNC_FOLDERS: ${CRON_BACKUP_SYNC_FOLDERS}
+  #     MAX_BACKUPS: 7
+  #     INIT_BACKUP: 1
+  #     INIT_BACKUP_TIMEOUT: 0
+  #     CRON_TIME: '0 4 * * *'
 
   # hass
   hass:
@@ -83,7 +83,7 @@ services:
 
   # caddy
   caddy:
-    image: abiosoft/caddy
+    image: orbsmiv/caddy-rpi
     container_name: caddy
     environment:
       ACME_AGREE: "true"
