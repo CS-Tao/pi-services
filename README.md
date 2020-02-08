@@ -34,15 +34,3 @@
     ```bash
     docker-compose up -d
     ```
-
-## 其它操作
-
-- 查看 seafile-db 备份数据
-    ```bash
-    docker exec seafile-db-backup ls /backup
-    ```
-
-- 恢复 seafile-db 数据
-    ```bash
-    docker exec seafile-db-backup /restore.sh /backup/latest.<database_name>.sql.gz
-    ```
