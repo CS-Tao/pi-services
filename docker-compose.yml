@@ -45,41 +45,71 @@ services:
     networks:
       - portainer-network
 
-  # seafile (4 services)
-  seafile-db:
-    image:  jsurf/rpi-mariadb
-    container_name: seafile-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${SEAFILE_DB_ROOT_PASSWD}
-      MYSQL_LOG_CONSOLE: "true"
-    volumes:
-      - seafile-db-v:/var/lib/mysql
-    networks:
-      - seafile-network
-  memcached:
-    image: memcached:1.5.6
-    container_name: seafile-memcached
-    entrypoint: memcached -m 256
-    networks:
-      - seafile-network
-  seafile:
-    image: seafileltd/seafile-mc:latest
-    container_name: seafile
-    volumes:
-      - seafile-shared-v:/shared
-    environment:
-      - DB_HOST=seafile-db
-      - TIME_ZONE=Asia/Shanghai
-      - SEAFILE_SERVER_LETSENCRYPT=false
-      - DB_ROOT_PASSWD=${SEAFILE_DB_ROOT_PASSWD}
-      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL}
-      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}
-      - SEAFILE_SERVER_HOSTNAME=${SEAFILE_SERVER_HOSTNAME}
+  # owncloud (3 service)
+  owncloud:
+    image: owncloud/server:latest
+    container_name: owncloud
+    restart: always
     depends_on:
-      - seafile-db
-      - memcached
+      - owncloud-db
+      - owncloud-redis
+    environment:
+      - OWNCLOUD_DOMAIN=${OWNCLOUD_DOMAIN}
+      - OWNCLOUD_DB_TYPE=mysql
+      - OWNCLOUD_DB_NAME=owncloud
+      - OWNCLOUD_DB_USERNAME=${OWNCLOUD_DB_USERNAME}
+      - OWNCLOUD_DB_PASSWORD=${OWNCLOUD_DB_PASSWORD}
+      - OWNCLOUD_DB_HOST=db
+      - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - OWNCLOUD_MYSQL_UTF8MB4=true
+      - OWNCLOUD_REDIS_ENABLED=true
+      - OWNCLOUD_REDIS_HOST=redis
+    healthcheck:
+      test: ["CMD", "/usr/bin/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - owncloud-files-v:/mnt/data
     networks:
-      - seafile-network
+      - owncloud-network
+  owncloud-db:
+    image: webhippie/mariadb:latest
+    container_name: owncloud-db
+    restart: always
+    environment:
+      - MARIADB_ROOT_PASSWORD=${OWNCLOUD_DB_ROOT_PASSWORD}
+      - MARIADB_USERNAME=${OWNCLOUD_DB_USERNAME}
+      - MARIADB_PASSWORD=${OWNCLOUD_DB_PASSWORD}
+      - MARIADB_DATABASE=owncloud
+      - MARIADB_MAX_ALLOWED_PACKET=128M
+      - MARIADB_INNODB_LOG_FILE_SIZE=64M
+    healthcheck:
+      test: ["CMD", "/usr/bin/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - owncloud-db-v:/var/lib/mysql
+      - ./owncloud/backup/:/var/lib/backup
+    networks:
+      - owncloud-network
+  owncloud-redis:
+    image: webhippie/redis:latest
+    container_name: owncloud-redis
+    restart: always
+    environment:
+      - REDIS_DATABASES=1
+    healthcheck:
+      test: ["CMD", "/usr/bin/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - owncloud-redis-v:/var/lib/redis
+    networks:
+      - owncloud-network
 
   # caddy
   caddy:
@@ -90,7 +120,7 @@ services:
       DOMAIN_FILES: ${CADDY_DOMAIN_FILES}
       DOMAIN_HASS: ${CADDY_DOMAIN_HASS}
       DOMAIN_PORTAINER: ${CADDY_DOMAIN_PORTAINER}
-      DOMAIN_SEAFILE: ${CADDY_DOMAIN_SEAFILE}
+      DOMAIN_OWNCLOUD: ${CADDY_DOMAIN_OWNCLOUD}
     restart: unless-stopped
     ports:
       - ${CADDY_PORT}:2015
@@ -102,19 +132,21 @@ services:
     depends_on:
       - hass
       - portainer
-      - seafile
+      - owncloud
     networks:
       - hass-network
       - portainer-network
-      - seafile-network
+      - owncloud-network
 
 volumes:
   portainer-v:
     name: portainer-data
-  seafile-db-v:
-    name: seafile-db
-  seafile-shared-v:
-    name: seafile-shared
+  owncloud-files-v:
+    name: owncloud-files
+  owncloud-db-v:
+    name: owncloud-db
+  owncloud-redis-v:
+    name: owncloud-redis
 
 networks:
   default:
@@ -123,5 +155,5 @@ networks:
     name: portainer-network
   hass-network:
     name: hass-network
-  seafile-network:
-    name: seafile-network
+  owncloud-network:
+    name: owncloud-network
