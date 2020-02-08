@@ -12,6 +12,7 @@ backup/sync/*
 # caddy
 caddy/logs/*
 caddy/www/*
+caddy/.caddy/*
 
 # hass
 hass/config/*

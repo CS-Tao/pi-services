@@ -125,6 +125,7 @@ services:
     ports:
       - ${CADDY_PORT}:2015
     volumes:
+      - ./caddy/.caddy:/root/.caddy
       - ./caddy/Caddyfile:/etc/Caddyfile:ro
       - ./caddy/caddyfile.d/:/etc/caddyfile.d/:ro
       - ./caddy/www/:/srv/:ro
