@@ -1,27 +1,6 @@
 version: '3.5'
 
 services:
-  # cron-backup
-  # cron-backup:
-  #   image: cstao/cron-backup:v1.0.0
-  #   container_name: cron-backup
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./backup/backups/:/root/backups/
-  #     - ./backup/sync/:/root/sync/
-  #     - ./backup/log/:/var/log/
-  #   environment:
-  #     HOST: ${CRON_BACKUP_HOST}
-  #     SSH_PORT: ${CRON_BACKUP_SSH_PORT}
-  #     SSH_USER: ${CRON_BACKUP_SSH_USER}
-  #     SSH_PASSWD: ${CRON_BACKUP_SSH_PASSWD}
-  #     SYNC_FILES: ${CRON_BACKUP_SYNC_FILES}
-  #     SYNC_FOLDERS: ${CRON_BACKUP_SYNC_FOLDERS}
-  #     MAX_BACKUPS: 7
-  #     INIT_BACKUP: 1
-  #     INIT_BACKUP_TIMEOUT: 0
-  #     CRON_TIME: '0 4 * * *'
-
   # hass
   hass:
     image: homeassistant/home-assistant
@@ -45,71 +24,52 @@ services:
     networks:
       - portainer-network
 
-  # owncloud (3 service)
-  owncloud:
-    image: owncloud/server:latest
-    container_name: owncloud
+  # cloud (3 service)
+  cloud:
+    image: arm32v7/nextcloud:latest
+    container_name: cloud
     restart: always
+    environment:
+      - NEXTCLOUD_TRUSTED_DOMAINS=${CLOUD_DOMAIN}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=${CLOUD_DB_USERNAME}
+      - MYSQL_PASSWORD=${CLOUD_DB_PASSWORD}
+      - MYSQL_HOST=cloud-db
+      - NEXTCLOUD_ADMIN_USER=${CLOUD_ADMIN_USERNAME}
+      - NEXTCLOUD_ADMIN_PASSWORD=${CLOUD_ADMIN_PASSWORD}
+      - REDIS_HOST=cloud-redis
     depends_on:
-      - owncloud-db
-      - owncloud-redis
-    environment:
-      - OWNCLOUD_DOMAIN=${OWNCLOUD_DOMAIN}
-      - OWNCLOUD_DB_TYPE=mysql
-      - OWNCLOUD_DB_NAME=owncloud
-      - OWNCLOUD_DB_USERNAME=${OWNCLOUD_DB_USERNAME}
-      - OWNCLOUD_DB_PASSWORD=${OWNCLOUD_DB_PASSWORD}
-      - OWNCLOUD_DB_HOST=owncloud-db
-      - OWNCLOUD_ADMIN_USERNAME=${OWNCLOUD_ADMIN_USERNAME}
-      - OWNCLOUD_ADMIN_PASSWORD=${OWNCLOUD_ADMIN_PASSWORD}
-      - OWNCLOUD_MYSQL_UTF8MB4=true
-      - OWNCLOUD_REDIS_ENABLED=true
-      - OWNCLOUD_REDIS_HOST=owncloud-redis
-    healthcheck:
-      test: ["CMD", "/usr/bin/healthcheck"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      - cloud-db
     volumes:
-      - owncloud-files-v:/mnt/data
+      - cloud-data-v:/var/www/html
     networks:
-      - owncloud-network
-  owncloud-db:
+      - cloud-network
+  cloud-db:
     image: webhippie/mariadb:latest
-    container_name: owncloud-db
+    container_name: cloud-db
     restart: always
     environment:
-      - MARIADB_ROOT_PASSWORD=${OWNCLOUD_DB_ROOT_PASSWORD}
-      - MARIADB_USERNAME=${OWNCLOUD_DB_USERNAME}
-      - MARIADB_PASSWORD=${OWNCLOUD_DB_PASSWORD}
-      - MARIADB_DATABASE=owncloud
+      - MARIADB_ROOT_PASSWORD=${CLOUD_DB_ROOT_PASSWORD}
+      - MARIADB_USERNAME=${CLOUD_DB_USERNAME}
+      - MARIADB_PASSWORD=${CLOUD_DB_PASSWORD}
+      - MARIADB_DATABASE=nextcloud
       - MARIADB_MAX_ALLOWED_PACKET=128M
       - MARIADB_INNODB_LOG_FILE_SIZE=64M
-    healthcheck:
-      test: ["CMD", "/usr/bin/healthcheck"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     volumes:
-      - owncloud-db-v:/var/lib/mysql
-      - ./owncloud/backup/:/var/lib/backup
+      - cloud-db-v:/var/lib/mysql
+      - ./cloud/backup/:/var/lib/backup
     networks:
-      - owncloud-network
-  owncloud-redis:
+      - cloud-network
+  cloud-redis:
     image: webhippie/redis:latest
-    container_name: owncloud-redis
+    container_name: cloud-redis
     restart: always
     environment:
       - REDIS_DATABASES=1
-    healthcheck:
-      test: ["CMD", "/usr/bin/healthcheck"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     volumes:
-      - owncloud-redis-v:/var/lib/redis
+      - cloud-redis-v:/var/lib/redis
     networks:
-      - owncloud-network
+      - cloud-network
 
   # caddy
   caddy:
@@ -120,7 +80,7 @@ services:
       DOMAIN_FILES: ${CADDY_DOMAIN_FILES}
       DOMAIN_HASS: ${CADDY_DOMAIN_HASS}
       DOMAIN_PORTAINER: ${CADDY_DOMAIN_PORTAINER}
-      DOMAIN_OWNCLOUD: ${CADDY_DOMAIN_OWNCLOUD}
+      DOMAIN_CLOUD: ${CADDY_DOMAIN_CLOUD}
     restart: unless-stopped
     ports:
       - ${CADDY_PORT}:2015
@@ -133,21 +93,21 @@ services:
     depends_on:
       - hass
       - portainer
-      - owncloud
+      - cloud
     networks:
       - hass-network
       - portainer-network
-      - owncloud-network
+      - cloud-network
 
 volumes:
   portainer-v:
     name: portainer-data
-  owncloud-files-v:
-    name: owncloud-files
-  owncloud-db-v:
-    name: owncloud-db
-  owncloud-redis-v:
-    name: owncloud-redis
+  cloud-data-v:
+    name: cloud-data
+  cloud-db-v:
+    name: cloud-db
+  cloud-redis-v:
+    name: cloud-redis
 
 networks:
   default:
@@ -156,5 +116,5 @@ networks:
     name: portainer-network
   hass-network:
     name: hass-network
-  owncloud-network:
-    name: owncloud-network
+  cloud-network:
+    name: cloud-network

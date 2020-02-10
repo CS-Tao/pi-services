@@ -17,8 +17,8 @@ caddy/.caddy/*
 # hass
 hass/config/*
 
-# owncloud
-owncloud/backup/*
+# cloud
+cloud/backup/*
 
 # upload folder only
 !.gitkeep
