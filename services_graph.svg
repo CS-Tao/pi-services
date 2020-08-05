@@ -9,7 +9,7 @@ link caddy to cloud--><path d="M204.6848,50.0034 C189.3338,58.687 172.6692,70.15
 link caddy to hass--><path d="M245.5,54.1354 C245.5,74.4937 245.5,104.1907 245.5,125.908 " fill="none" id="caddy-&gt;hass" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="245.5,130.9684,249.5,121.9684,245.5,125.9684,241.5,121.9684,245.5,130.9684" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="75" x="246.5" y="97.0669">depends on</text><!--MD5=[5a72d451b02aee77c78d3b7225f9f0db]
 link caddy to portainer--><path d="M286.1335,51.0936 C300.9947,59.7894 317.1699,70.9781 329.5,84 C341.0154,96.1615 350.3252,112.3656 356.9571,126.1204 " fill="none" id="caddy-&gt;portainer" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="359.1029,130.6819,358.8912,120.8353,356.9744,126.1576,351.6522,124.2408,359.1029,130.6819" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="75" x="342.5" y="97.0669">depends on</text><!--MD5=[ae4b9396c2b87340065308ca4605cfce]
 link cloud to cloud-db--><path d="M103.779,177.1463 C95.5134,185.8827 86.8091,196.3086 80.5,207 C72.8914,219.8935 67.2367,235.5532 63.3337,248.7892 " fill="none" id="cloud-&gt;cloud-db" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="61.8715,253.9199,68.1851,246.3609,63.2419,249.1114,60.4914,244.1682,61.8715,253.9199" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="75" x="81.5" y="220.0669">depends on</text><!--MD5=[c05751eccb469ecbe544363a996901a2]
-link cloud to cloud-redis--><path d="M143.203,177.07 C149.0053,186.3139 155.6658,197.1019 161.5,207 C169.6159,220.7693 178.3023,236.2785 185.4124,249.1925 " fill="none" id="cloud-&gt;cloud-redis" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="187.9566,253.8249,187.1301,244.0108,185.5496,249.4424,180.118,247.8619,187.9566,253.8249" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="75" x="171.5" y="220.0669">depends on</text><!--MD5=[37f6a16c0db720f19ef82452e7064bea]
+link cloud to cloud-redis--><path d="M143.203,177.07 C149.0053,186.3139 155.6658,197.1019 161.5,207 C169.6159,220.7693 178.3023,236.2785 185.4124,249.1925 " fill="none" id="cloud-&gt;cloud-redis" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="187.9566,253.8249,187.1301,244.0108,185.5496,249.4424,180.118,247.8619,187.9566,253.8249" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="75" x="171.5" y="220.0669">depends on</text><!--MD5=[24c35f272ac8111e1244ae9c3ab66e82]
 @startuml
 skinparam componentStyle uml2
 [caddy]
@@ -26,11 +26,11 @@ skinparam componentStyle uml2
 
 @enduml
 
-PlantUML version 1.2019.11(Sun Sep 22 10:02:15 GMT 2019)
+PlantUML version 1.2020.06(Sun Apr 05 12:38:32 GMT 2020)
 (GPL source distribution)
 Java Runtime: OpenJDK Runtime Environment
 JVM: OpenJDK 64-Bit Server VM
-Java Version: 14-ea+15
+Java Version: 14-ea+33
 Operating System: Linux
 Default Encoding: UTF-8
 Language: en
