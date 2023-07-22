@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.9'
 
 services:
   # hass
@@ -74,23 +74,33 @@ services:
 
   # caddy
   caddy:
-    image: orbsmiv/caddy-rpi
+    build:
+      context: caddy
+      args:
+        BUILD_VPN_PROXY: ${CADDY_BUILD_VPN_PROXY}
     container_name: caddy
     environment:
       ACME_AGREE: "true"
+      TLS_EMAIL: ${CADDY_TLS_EMAIL}
       DOMAIN_FILES: ${CADDY_DOMAIN_FILES}
       DOMAIN_HASS: ${CADDY_DOMAIN_HASS}
       DOMAIN_PORTAINER: ${CADDY_DOMAIN_PORTAINER}
       DOMAIN_CLOUD: ${CADDY_DOMAIN_CLOUD}
+      ALIYUN_ACCESS_KEY_ID: ${CADDY_ALIYUN_ACCESS_KEY_ID}
+      ALIYUN_ACCESS_KEY_SECRET: ${CADDY_ALIYUN_ACCESS_KEY_SECRET}
     restart: unless-stopped
     ports:
-      - ${CADDY_PORT}:2015
+      - ${CADDY_PORT}:80
+      - ${CADDY_SSL_PORT}:443
+      - ${CADDY_SSL_PORT}:443/udp
     volumes:
-      - ./caddy/.caddy:/root/.caddy
-      - ./caddy/Caddyfile:/etc/Caddyfile:ro
-      - ./caddy/caddyfile.d/:/etc/caddyfile.d/:ro
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/caddyfile.d/:/etc/caddy/caddyfile.d/:ro
       - ./caddy/www/:/srv/:ro
+      - ./caddy/.caddy:/root/.caddy
       - ./caddy/logs/:/var/logs/
+      - caddy-data-v:/data
+      - caddy-config-v:/config
     depends_on:
       - hass
       - portainer
@@ -109,6 +119,10 @@ volumes:
     name: cloud-db
   cloud-redis-v:
     name: cloud-redis
+  caddy-data-v:
+    name: caddy-data
+  caddy-config-v:
+    name: caddy-config
 
 networks:
   default:
