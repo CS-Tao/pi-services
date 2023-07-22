@@ -21,7 +21,7 @@
     git clone https://github.com/CS-Tao/pi-services.git
     ```
 
-1. 添加环境变量文件`.env`到项目根目录，复制`ci.env`内容到`.env`文件中，并修改其中各项环境变量的值
+1. 添加环境变量文件`.env`到项目根目录，复制`.env.ci`内容到`.env`文件中，并修改其中各项环境变量的值
 
 1. 拉取镜像
 

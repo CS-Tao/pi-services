@@ -17,7 +17,7 @@ jobs:
         sudo mv docker-compose /usr/local/bin
     - name: Pull images
       run: |
-        cp ci.env .env
+        cp .env.ci .env
         docker-compose pull
     - name: Generate compose graph
       run: |
