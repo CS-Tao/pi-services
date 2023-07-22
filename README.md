@@ -32,5 +32,5 @@
 1. 启动容器组
 
     ```bash
-    docker-compose up -d
+    docker-compose up -d --no-build
     ```
