@@ -1,16 +1,14 @@
 version: '3.9'
 
 services:
-  # hass
+  # hass - port 8213
   hass:
     image: homeassistant/home-assistant
     container_name: home-assistant
     volumes:
       - ./hass/config/:/config/
       - /etc/localtime:/etc/localtime:ro
-    # network_mode: host
-    networks:
-      - hass-network
+    network_mode: host
 
   # portainer
   portainer:
@@ -24,51 +22,38 @@ services:
     networks:
       - portainer-network
 
-  # cloud (3 service)
+  # cloud (2 service)
   cloud:
     image: arm32v7/nextcloud:latest
     container_name: cloud
     restart: always
     environment:
-      - NEXTCLOUD_TRUSTED_DOMAINS=${CLOUD_DOMAIN}
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=${CLOUD_DB_USERNAME}
       - MYSQL_PASSWORD=${CLOUD_DB_PASSWORD}
       - MYSQL_HOST=cloud-db
+      - NEXTCLOUD_TRUSTED_DOMAINS=${CLOUD_DOMAIN}
       - NEXTCLOUD_ADMIN_USER=${CLOUD_ADMIN_USERNAME}
       - NEXTCLOUD_ADMIN_PASSWORD=${CLOUD_ADMIN_PASSWORD}
-      - REDIS_HOST=cloud-redis
     depends_on:
       - cloud-db
-      - cloud-redis
     volumes:
       - cloud-data-v:/var/www/html
     networks:
       - cloud-network
   cloud-db:
-    image: webhippie/mariadb:latest
+    image: mariadb:10.6
     container_name: cloud-db
     restart: always
-    environment:
-      - MARIADB_ROOT_PASSWORD=${CLOUD_DB_ROOT_PASSWORD}
-      - MARIADB_USERNAME=${CLOUD_DB_USERNAME}
-      - MARIADB_PASSWORD=${CLOUD_DB_PASSWORD}
-      - MARIADB_DATABASE=nextcloud
-      - MARIADB_MAX_ALLOWED_PACKET=128M
-      - MARIADB_INNODB_LOG_FILE_SIZE=64M
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
       - cloud-db-v:/var/lib/mysql
       - ./cloud/backup/:/var/lib/backup
-    networks:
-      - cloud-network
-  cloud-redis:
-    image: webhippie/redis:latest
-    container_name: cloud-redis
-    restart: always
     environment:
-      - REDIS_DATABASES=1
-    volumes:
-      - cloud-redis-v:/var/lib/redis
+      - MYSQL_ROOT_PASSWORD==${CLOUD_DB_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${CLOUD_DB_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=${CLOUD_DB_USERNAME}
     networks:
       - cloud-network
 
@@ -84,7 +69,6 @@ services:
       ACME_AGREE: "true"
       TLS_EMAIL: ${CADDY_TLS_EMAIL}
       DOMAIN_FILES: ${CADDY_DOMAIN_FILES}
-      DOMAIN_HASS: ${CADDY_DOMAIN_HASS}
       DOMAIN_PORTAINER: ${CADDY_DOMAIN_PORTAINER}
       DOMAIN_CLOUD: ${CADDY_DOMAIN_CLOUD}
       ALIYUN_ACCESS_KEY_ID: ${CADDY_ALIYUN_ACCESS_KEY_ID}
@@ -103,11 +87,9 @@ services:
       - caddy-data-v:/data
       - caddy-config-v:/config
     depends_on:
-      - hass
       - portainer
       - cloud
     networks:
-      - hass-network
       - portainer-network
       - cloud-network
 
@@ -118,8 +100,6 @@ volumes:
     name: cloud-data
   cloud-db-v:
     name: cloud-db
-  cloud-redis-v:
-    name: cloud-redis
   caddy-data-v:
     name: caddy-data
   caddy-config-v:
@@ -130,7 +110,5 @@ networks:
     name: pi-services-network
   portainer-network:
     name: portainer-network
-  hass-network:
-    name: hass-network
   cloud-network:
     name: cloud-network
