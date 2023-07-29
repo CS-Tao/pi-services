@@ -11,7 +11,7 @@
 
 ## 已配置服务
 
-![services_graph.svg](https://home.cs-tao.cc/pi-services/services_graph.svg?a)
+![services_graph.svg](https://home.cs-tao.cc/pi-services/services_graph.svg?b)
 
 ## 部署方法
 
