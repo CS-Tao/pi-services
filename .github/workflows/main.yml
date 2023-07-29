@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@master
     - name: Install docker-compose
       env:
-        DOCKER_COMPOSE_VERSION: 1.24.1
+        DOCKER_COMPOSE_VERSION: v2.20.2
       run: |
         sudo rm /usr/local/bin/docker-compose
         curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -24,9 +24,9 @@ jobs:
         mkdir ci
         cat docker-compose.yml | docker run -i funkwerk/compose_plantuml --link-graph | docker run -i think/plantuml > ci/services_graph.svg
     - name: Deploy compose graph
-      uses: peaceiris/actions-gh-pages@v2
-      env:
-        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-        PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: ./ci
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: ./ci
       if: github.ref == 'refs/heads/master'
