@@ -4,11 +4,6 @@
 # for ci
 ci
 
-# backup
-backup/backups/*
-backup/log/*
-backup/sync/*
-
 # caddy
 caddy/logs/*
 caddy/www/*
@@ -17,8 +12,12 @@ caddy/.caddy/*
 # hass
 hass/config/*
 
-# cloud
-cloud/backup/*
+# alist
+alist/*
+
+# aria2
+aria2/config/*
+aria2/downloads/*
 
 # upload folder only
 !.gitkeep

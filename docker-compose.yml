@@ -10,6 +10,58 @@ services:
       - /etc/localtime:/etc/localtime:ro
     network_mode: host
 
+  aria2:
+    image: p3terx/aria2-pro
+    container_name: aria2
+    environment:
+      - PUID=0
+      - PGID=0
+      - UMASK_SET=022
+      - RPC_SECRET=${ARIA2_RPC_SECRET}
+      - RPC_PORT=6800
+      - LISTEN_PORT=6888
+      - DISK_CACHE=64M
+      - IPV6_MODE=false
+      - UPDATE_TRACKERS=true
+      - CUSTOM_TRACKER_URL=
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./aria2/config:/config
+      - ./aria2/downloads:/downloads
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+
+  ariang:
+    image: p3terx/ariang
+    container_name: ariang
+    command: --port 6880 --ipv6
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    depends_on:
+      - aria2
+
+  alist:
+    image: xhofe/alist:main
+    container_name: alist
+    restart: always
+    volumes:
+      - ./alist:/opt/alist/data
+    ports:
+      # infuse can not connect alist if use caddy reverse proxy
+      - 5244:5244
+    environment:
+      - PUID=0
+      - PGID=0
+      - UMASK=022
+    depends_on:
+      - ariang
+
   # portainer
   portainer:
     image: portainer/portainer
@@ -19,43 +71,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer-v:/data
-    networks:
-      - portainer-network
-
-  # cloud (2 service)
-  cloud:
-    image: arm32v7/nextcloud:latest
-    container_name: cloud
-    restart: always
-    environment:
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=${CLOUD_DB_USERNAME}
-      - MYSQL_PASSWORD=${CLOUD_DB_PASSWORD}
-      - MYSQL_HOST=cloud-db
-      - NEXTCLOUD_TRUSTED_DOMAINS=${CLOUD_DOMAIN}
-      - NEXTCLOUD_ADMIN_USER=${CLOUD_ADMIN_USERNAME}
-      - NEXTCLOUD_ADMIN_PASSWORD=${CLOUD_ADMIN_PASSWORD}
-    depends_on:
-      - cloud-db
-    volumes:
-      - cloud-data-v:/var/www/html
-    networks:
-      - cloud-network
-  cloud-db:
-    image: mariadb:10.6
-    container_name: cloud-db
-    restart: always
-    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
-    volumes:
-      - cloud-db-v:/var/lib/mysql
-      - ./cloud/backup/:/var/lib/backup
-    environment:
-      - MYSQL_ROOT_PASSWORD==${CLOUD_DB_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${CLOUD_DB_PASSWORD}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=${CLOUD_DB_USERNAME}
-    networks:
-      - cloud-network
 
   # caddy
   caddy:
@@ -68,9 +83,11 @@ services:
     environment:
       ACME_AGREE: "true"
       TLS_EMAIL: ${CADDY_TLS_EMAIL}
+      DOMAIN_ALIST: ${CADDY_DOMAIN_ALIST}
+      DOMAIN_ARIANG: ${CADDY_DOMAIN_ARIANG}
+      DOMAIN_ARIA2: ${CADDY_DOMAIN_ARIA2}
       DOMAIN_FILES: ${CADDY_DOMAIN_FILES}
       DOMAIN_PORTAINER: ${CADDY_DOMAIN_PORTAINER}
-      DOMAIN_CLOUD: ${CADDY_DOMAIN_CLOUD}
       ALIYUN_ACCESS_KEY_ID: ${CADDY_ALIYUN_ACCESS_KEY_ID}
       ALIYUN_ACCESS_KEY_SECRET: ${CADDY_ALIYUN_ACCESS_KEY_SECRET}
     restart: unless-stopped
@@ -88,18 +105,12 @@ services:
       - caddy-config-v:/config
     depends_on:
       - portainer
-      - cloud
-    networks:
-      - portainer-network
-      - cloud-network
+      - ariang
+      - alist
 
 volumes:
   portainer-v:
     name: portainer-data
-  cloud-data-v:
-    name: cloud-data
-  cloud-db-v:
-    name: cloud-db
   caddy-data-v:
     name: caddy-data
   caddy-config-v:
@@ -108,7 +119,3 @@ volumes:
 networks:
   default:
     name: pi-services-network
-  portainer-network:
-    name: portainer-network
-  cloud-network:
-    name: cloud-network
