@@ -60,7 +60,7 @@ services:
       - PGID=0
       - UMASK=022
     depends_on:
-      - ariang
+      - aria2
 
   # portainer
   portainer:
