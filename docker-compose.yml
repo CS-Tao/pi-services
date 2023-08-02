@@ -4,7 +4,7 @@ services:
   # hass - port 8213
   hass:
     image: homeassistant/home-assistant
-    container_name: home-assistant
+    container_name: hass
     volumes:
       - ./hass/config/:/config/
       - /etc/localtime:/etc/localtime:ro
