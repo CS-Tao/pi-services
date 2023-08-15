@@ -22,7 +22,7 @@ jobs:
     - name: Generate compose graph
       run: |
         mkdir ci
-        cat docker-compose.yml | docker run -i funkwerk/compose_plantuml --link-graph | docker run -i think/plantuml > ci/services_graph.svg
+        cat docker-compose.yml | docker run -i funkwerk/compose_plantuml --link-graph --boundaries | docker run -i think/plantuml > ci/services_graph.svg
     - name: Deploy compose graph
       uses: peaceiris/actions-gh-pages@v3
       with:
