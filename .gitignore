@@ -16,8 +16,15 @@ hass/config/*
 alist/*
 
 # aria2
+aria2/*
+!aria2/config
+!aria2/downloads
+!aria2/others
 aria2/config/*
 aria2/downloads/*
+aria2/others/*
 
 # upload folder only
 !.gitkeep
+
+*.DS_Store
